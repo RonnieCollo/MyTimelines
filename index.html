@@ -4,46 +4,18 @@
 <meta charset="UTF-8">
 <title>Bookmarks</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-}
+body { font-family: Arial; margin: 20px; }
+ul { list-style: none; padding-left: 20px; }
+li { margin: 2px 0; }
 
-ul {
-  list-style-type: none;
-  padding-left: 20px;
-}
+.folder { font-weight: bold; cursor: pointer; }
+.folder::before { content: "📁 "; }
+.bookmark::before { content: "🔗 "; }
 
-li {
-  margin: 2px 0;
-}
+.nested { display: none; }
+.open { display: block; }
 
-.folder {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.folder::before {
-  content: "📁 ";
-}
-
-.bookmark::before {
-  content: "🔗 ";
-}
-
-.nested {
-  display: none;
-}
-
-.open {
-  display: block;
-}
-
-.toggle {
-  cursor: pointer;
-  margin-right: 5px;
-  color: #666;
-}
+.toggle { cursor: pointer; margin-right: 5px; color: #666; }
 </style>
 </head>
 <body>
@@ -53,73 +25,76 @@ li {
 
 <script>
 fetch("bookmarks.html")
-  .then(r => r.text())
-  .then(text => {
+.then(r => r.text())
+.then(text => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, "text/html");
-    const rootDL = doc.querySelector("DL");
-    const tree = parseDL(rootDL);
-    document.getElementById("bookmarks").appendChild(tree);
-  });
+    const root = doc.querySelector("DL");
+    document.getElementById("bookmarks").appendChild(parseDL(root));
+});
+
+function getNextElementSibling(node) {
+    let next = node.nextSibling;
+    while (next && next.nodeType !== 1) {
+        next = next.nextSibling;
+    }
+    return next;
+}
 
 function parseDL(dl) {
-  const ul = document.createElement("ul");
+    const ul = document.createElement("ul");
 
-  let node = dl.firstChild;
+    let node = dl.firstElementChild;
 
-  while (node) {
-    if (node.nodeName === "DT") {
-      const li = document.createElement("li");
+    while (node) {
+        if (node.tagName === "DT") {
+            const li = document.createElement("li");
 
-      const h3 = node.querySelector("H3");
-      const a = node.querySelector("A");
+            const folder = node.querySelector(":scope > H3");
+            const link = node.querySelector(":scope > A");
 
-      if (h3) {
-        const toggle = document.createElement("span");
-        toggle.textContent = "▶";
-        toggle.className = "toggle";
+            if (folder) {
+                const toggle = document.createElement("span");
+                toggle.textContent = "▶";
+                toggle.className = "toggle";
 
-        const folder = document.createElement("span");
-        folder.textContent = h3.textContent;
-        folder.className = "folder";
+                const title = document.createElement("span");
+                title.textContent = folder.textContent;
+                title.className = "folder";
 
-        li.appendChild(toggle);
-        li.appendChild(folder);
+                li.appendChild(toggle);
+                li.appendChild(title);
 
-        let next = node.nextSibling;
-        while (next && next.nodeName !== "DL") {
-          next = next.nextSibling;
+                const nextDL = getNextElementSibling(node);
+                if (nextDL && nextDL.tagName === "DL") {
+                    const child = parseDL(nextDL);
+                    child.classList.add("nested");
+                    li.appendChild(child);
+
+                    toggle.onclick = () => {
+                        child.classList.toggle("open");
+                        toggle.textContent =
+                            child.classList.contains("open") ? "▼" : "▶";
+                    };
+                }
+            }
+
+            if (link) {
+                const a = document.createElement("a");
+                a.href = link.href;
+                a.textContent = link.textContent;
+                a.target = "_blank";
+                a.className = "bookmark";
+                li.appendChild(a);
+            }
+
+            ul.appendChild(li);
         }
 
-        if (next) {
-          const childUL = parseDL(next);
-          childUL.classList.add("nested");
-          li.appendChild(childUL);
-
-          toggle.onclick = () => {
-            childUL.classList.toggle("open");
-            toggle.textContent =
-              childUL.classList.contains("open") ? "▼" : "▶";
-          };
-        }
-      }
-
-      if (a) {
-        const link = document.createElement("a");
-        link.href = a.href;
-        link.textContent = a.textContent;
-        link.target = "_blank";
-        link.className = "bookmark";
-        li.appendChild(link);
-      }
-
-      ul.appendChild(li);
+        node = node.nextElementSibling;
     }
 
-    node = node.nextSibling;
-  }
-
-  return ul;
+    return ul;
 }
 </script>
 
