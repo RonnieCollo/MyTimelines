@@ -2,166 +2,147 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Bookmarks Split View</title>
+<title>Bookmarks Viewer</title>
 <style>
-body {
+  html, body {
     margin: 0;
-    height: 100vh;
-    display: flex;
-    font-family: Arial, sans-serif;
+    height: 100%;
     overflow: hidden;
-}
-
-#sidebar {
-    width: 540px; /* 80% wider initial width */
-    min-width: 150px;
-    max-width: 600px;
-    overflow-y: auto;
-    border-right: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
+    font-family: sans-serif;
+  }
+  #container {
+    display: flex;
+    height: 100%;
+  }
+  #leftPane {
+    width: 80%;
     font-size: 0.9em; /* slightly smaller font */
-}
-
-#divider {
+    overflow: auto;
+    padding: 10px;
+    background: #f5f5f5;
+  }
+  #divider {
     width: 5px;
-    cursor: col-resize;
-    background-color: #ddd;
-}
-
-#content {
+    cursor: ew-resize;
+    background: #aaa;
+  }
+  #rightPane {
     flex: 1;
     border: none;
-}
-
-button {
-    margin-bottom: 10px;
-    padding: 5px 10px;
+  }
+  ul { list-style-type: none; padding-left: 20px; }
+  .folder > span {
     cursor: pointer;
-}
-
-ul { list-style-type: none; padding-left: 20px; margin: 0; }
-li { margin: 3px 0; }
-.folder { cursor: pointer; font-weight: bold; }
-.folder::before { content: "▶ "; display: inline-block; width: 1em; }
-.folder.expanded::before { content: "▼ "; }
-a { text-decoration: none; color: #0645AD; }
-a:hover { text-decoration: underline; }
+    user-select: none;
+  }
+  .folder > span::before {
+    content: "▶";
+    display: inline-block;
+    width: 1em;
+    margin-right: 5px;
+    transform: rotate(0deg);
+    transition: transform 0.2s;
+  }
+  .folder.expanded > span::before {
+    transform: rotate(90deg);
+  }
+  .folder ul { display: none; }
+  .folder.expanded ul { display: block; }
+  button { margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
-<div id="sidebar">
-    <h2>Bookmarks</h2>
-    <button id="collapseBtn">Collapse All Subfolders</button>
-    <div id="bookmarks"></div>
+<div id="container">
+  <div id="leftPane">
+    <button id="collapseBtn">Collapse All from Level 2</button>
+    <div id="bookmarks">
+      <!-- Bookmarks will be dynamically inserted here -->
+    </div>
+  </div>
+  <div id="divider"></div>
+  <iframe id="rightPane"></iframe>
 </div>
 
-<div id="divider"></div>
-
-<iframe id="content" src=""></iframe>
-
 <script>
-// Recursive function to build bookmarks tree
-function parseDL(dl, level = 1) {
-    const ul = document.createElement('ul');
-    Array.from(dl.children).forEach(dt => {
-        if (dt.tagName !== 'DT') return;
+// Example bookmarks data (nested)
+const bookmarksData = [
+  { title: "Home", children: [] },
+  { title: "MySeas", children: [
+      { title: "C-MAP Viewer", url: "https://www.c-map.com/fr-fr/chartexplorer/" },
+      { title: "OpenSeaMap", url: "https://map.openseamap.org/" },
+      { title: "Garmin Maps", url: "https://maps.garmin.com/fr-FR/marine?maps=another-brand&overlay=false&key=9z1fmr1ux877" }
+    ]
+  },
+  { title: "MyRuins", children: [
+      { title: "Our collections: sea charts and maps", url: "https://www.rmg.co.uk/collections/our-collections-sea-charts-maps" },
+      { title: "Historia", children: [
+          { title: "Cradle of Civilization", url: "https://en.wikipedia.org/wiki/Cradle_of_civilization" },
+          { title: "Timelines", children: [
+              { title: "Timeline Project", url: "https://thetimelineproj.sourceforge.net/" },
+              { title: "History Atlas", url: "https://www.historyatlas.com/" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
 
-        const folder = dt.querySelector('H3');
-        const bookmark = dt.querySelector('A');
-
-        if (folder) {
-            const li = document.createElement('li');
-            const span = document.createElement('span');
-            span.textContent = folder.textContent;
-            span.className = 'folder';
-            span.dataset.level = level;
-
-            span.addEventListener('click', () => {
-                span.classList.toggle('expanded');
-                const childUl = li.querySelector('ul');
-                if (childUl) childUl.style.display = childUl.style.display === 'none' ? 'block' : 'none';
-            });
-
-            li.appendChild(span);
-
-            const nestedDL = dt.querySelector('DL');
-            if (nestedDL) {
-                const childUl = parseDL(nestedDL, level + 1);
-                childUl.style.display = 'none';
-                li.appendChild(childUl);
-            }
-            ul.appendChild(li);
-        } else if (bookmark) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = bookmark.href;
-            a.textContent = bookmark.textContent;
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('content').src = bookmark.href;
-            });
-            li.appendChild(a);
-            ul.appendChild(li);
-        }
-    });
-    return ul;
+// Recursive function to build nested bookmarks
+function buildBookmarks(data, parent, level=1) {
+  const ul = document.createElement('ul');
+  data.forEach(item => {
+    const li = document.createElement('li');
+    if (item.children && item.children.length > 0) {
+      li.classList.add('folder');
+      li.dataset.level = level;
+      const span = document.createElement('span');
+      span.textContent = item.title;
+      span.addEventListener('click', () => {
+        li.classList.toggle('expanded');
+      });
+      li.appendChild(span);
+      li.appendChild(buildBookmarks(item.children, li, level+1));
+    } else if (item.url) {
+      const a = document.createElement('a');
+      a.href = item.url;
+      a.textContent = item.title;
+      a.target = 'rightPane';
+      li.appendChild(a);
+    }
+    ul.appendChild(li);
+  });
+  return ul;
 }
 
-// Load bookmarks HTML
-fetch('bookmarks.html')
-.then(response => response.text())
-.then(htmlText => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlText, 'text/html');
-    const topDL = doc.querySelector('DL');
-    if (topDL) {
-        const tree = parseDL(topDL);
-        document.getElementById('bookmarks').appendChild(tree);
-    }
-})
-.catch(err => console.error('Error loading bookmarks:', err));
+document.getElementById('bookmarks').appendChild(buildBookmarks(bookmarksData));
 
-// Collapse all subfolders (from level 2 down)
+// Collapse button (from level 2 down)
 document.getElementById('collapseBtn').addEventListener('click', () => {
-    const folders = document.querySelectorAll('#bookmarks .folder');
-    folders.forEach(folder => {
-        const level = parseInt(folder.dataset.level);
-        if (level > 1) {
-            folder.classList.remove('expanded');
-            const childUl = folder.parentElement.querySelector('ul');
-            if (childUl) childUl.style.display = 'none';
-        }
-    });
+  const folders = document.querySelectorAll('#bookmarks .folder');
+  folders.forEach(folder => {
+    const level = parseInt(folder.dataset.level);
+    if (level >= 2) { // collapse level 2 and deeper
+      folder.classList.remove('expanded');
+    }
+  });
 });
 
-// Resizable divider
+// Divider drag for resizing
 const divider = document.getElementById('divider');
-const sidebar = document.getElementById('sidebar');
-const content = document.getElementById('content');
+const leftPane = document.getElementById('leftPane');
 let isDragging = false;
 
-divider.addEventListener('mousedown', e => {
-    isDragging = true;
-    document.body.style.cursor = 'col-resize';
-});
-
+divider.addEventListener('mousedown', e => { isDragging = true; });
 document.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    let newWidth = e.clientX;
-    if (newWidth < 150) newWidth = 150;  // min width
-    if (newWidth > 600) newWidth = 600;  // max width
-    sidebar.style.width = newWidth + 'px';
-    content.style.width = `calc(100% - ${newWidth + 5}px)`; // 5px divider width
+  if (!isDragging) return;
+  let newWidth = e.clientX;
+  if (newWidth < 100) newWidth = 100;
+  if (newWidth > window.innerWidth - 100) newWidth = window.innerWidth - 100;
+  leftPane.style.width = newWidth + 'px';
 });
-
-document.addEventListener('mouseup', e => {
-    if (isDragging) {
-        isDragging = false;
-        document.body.style.cursor = 'default';
-    }
-});
+document.addEventListener('mouseup', e => { isDragging = false; });
 </script>
 
 </body>
