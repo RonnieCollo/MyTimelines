@@ -2,10 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>My Bookmarks</title>
+<title>Bookmarks Sidebar</title>
 <style>
-body { font-family: Arial, sans-serif; line-height: 1.4; padding: 20px; }
-ul { list-style-type: none; padding-left: 20px; }
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+
+#sidebar {
+    width: 300px;
+    overflow-y: auto;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#content {
+    flex: 1;
+    border: none;
+}
+
+ul { list-style-type: none; padding-left: 20px; margin: 0; }
 li { margin: 3px 0; }
 .folder { cursor: pointer; font-weight: bold; }
 .folder::before { content: "▶ "; display: inline-block; width: 1em; }
@@ -15,11 +34,16 @@ a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<h1>My Bookmarks</h1>
-<div id="bookmarks"></div>
+
+<div id="sidebar">
+    <h2>Bookmarks</h2>
+    <div id="bookmarks"></div>
+</div>
+
+<iframe id="content" src=""></iframe>
 
 <script>
-// Recursive function to convert bookmark HTML into nested <ul>
+// Recursive function to build bookmarks tree
 function parseDL(dl) {
     const ul = document.createElement('ul');
     Array.from(dl.children).forEach(dt => {
@@ -52,7 +76,10 @@ function parseDL(dl) {
             const a = document.createElement('a');
             a.href = bookmark.href;
             a.textContent = bookmark.textContent;
-            a.target = '_blank';
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('content').src = bookmark.href;
+            });
             li.appendChild(a);
             ul.appendChild(li);
         }
@@ -60,7 +87,7 @@ function parseDL(dl) {
     return ul;
 }
 
-// Load bookmarks.html content
+// Load bookmarks HTML
 fetch('bookmarks.html')
 .then(response => response.text())
 .then(htmlText => {
@@ -74,5 +101,6 @@ fetch('bookmarks.html')
 })
 .catch(err => console.error('Error loading bookmarks:', err));
 </script>
+
 </body>
 </html>
