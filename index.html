@@ -2,21 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Bookmarks Sidebar</title>
+<title>Bookmarks Split View</title>
 <style>
 body {
     margin: 0;
     height: 100vh;
     display: flex;
     font-family: Arial, sans-serif;
+    overflow: hidden;
 }
 
 #sidebar {
-    width: 300px;
+    width: 300px; /* initial width */
+    min-width: 150px;
+    max-width: 600px;
     overflow-y: auto;
     border-right: 1px solid #ccc;
     padding: 10px;
     box-sizing: border-box;
+}
+
+#divider {
+    width: 5px;
+    cursor: col-resize;
+    background-color: #ddd;
 }
 
 #content {
@@ -39,6 +48,8 @@ a:hover { text-decoration: underline; }
     <h2>Bookmarks</h2>
     <div id="bookmarks"></div>
 </div>
+
+<div id="divider"></div>
 
 <iframe id="content" src=""></iframe>
 
@@ -100,6 +111,31 @@ fetch('bookmarks.html')
     }
 })
 .catch(err => console.error('Error loading bookmarks:', err));
+
+// Resizable divider
+const divider = document.getElementById('divider');
+const sidebar = document.getElementById('sidebar');
+let isDragging = false;
+
+divider.addEventListener('mousedown', e => {
+    isDragging = true;
+    document.body.style.cursor = 'col-resize';
+});
+
+document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    let newWidth = e.clientX;
+    if (newWidth < 150) newWidth = 150;  // min width
+    if (newWidth > 600) newWidth = 600;  // max width
+    sidebar.style.width = newWidth + 'px';
+});
+
+document.addEventListener('mouseup', e => {
+    if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+    }
+});
 </script>
 
 </body>
