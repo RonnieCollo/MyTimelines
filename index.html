@@ -13,13 +13,14 @@ body {
 }
 
 #sidebar {
-    width: 300px; /* initial width */
+    width: 540px; /* 80% wider initial width */
     min-width: 150px;
     max-width: 600px;
     overflow-y: auto;
     border-right: 1px solid #ccc;
     padding: 10px;
     box-sizing: border-box;
+    font-size: 0.9em; /* slightly smaller font */
 }
 
 #divider {
@@ -115,6 +116,7 @@ fetch('bookmarks.html')
 // Resizable divider
 const divider = document.getElementById('divider');
 const sidebar = document.getElementById('sidebar');
+const content = document.getElementById('content');
 let isDragging = false;
 
 divider.addEventListener('mousedown', e => {
@@ -128,6 +130,7 @@ document.addEventListener('mousemove', e => {
     if (newWidth < 150) newWidth = 150;  // min width
     if (newWidth > 600) newWidth = 600;  // max width
     sidebar.style.width = newWidth + 'px';
+    content.style.width = `calc(100% - ${newWidth + 5}px)`; // 5px divider width
 });
 
 document.addEventListener('mouseup', e => {
