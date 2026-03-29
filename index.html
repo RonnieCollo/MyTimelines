@@ -1,211 +1,46 @@
-  <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Bookmarks</title>
-
-<style>
-body {
-  font-family: system-ui;
-  margin: 20px;
-  background: #f5f5f5;
-  color: #222;
-}
-
-.dark {
-  background: #1e1e1e;
-  color: #ddd;
-}
-
-h1 {
-  margin-bottom: 10px;
-}
-
-#controls {
-  margin-bottom: 15px;
-}
-
-input {
-  padding: 6px;
-  width: 250px;
-}
-
-button {
-  padding: 6px 10px;
-  margin-left: 5px;
-  cursor: pointer;
-}
-
-ul {
-  list-style: none;
-  padding-left: 20px;
-}
-
-li {
-  margin: 2px 0;
-}
-
-.folder {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.folder::before {
-  content: "📁 ";
-}
-
-.bookmark {
-  text-decoration: none;
-  color: inherit;
-}
-
-.bookmark:hover {
-  text-decoration: underline;
-}
-
-.favicon {
-  width: 16px;
-  height: 16px;
-  margin-right: 5px;
-  vertical-align: middle;
-}
-
-.toggle {
-  cursor: pointer;
-  margin-right: 5px;
-}
-
-.nested {
-  display: none;
-}
-
-.open {
-  display: block;
-}
-</style>
-</head>
-
-<body>
-
-<h1>My Bookmarks</h1>
-
-<div id="controls">
-  <input type="text" id="search" placeholder="Search...">
-  <button onclick="toggleAll(true)">Expand All</button>
-  <button onclick="toggleAll(false)">Collapse All</button>
-  <button onclick="toggleDark()">Dark Mode</button>
-</div>
-
-<div id="tree"></div>
-
 <script>
-fetch("./bookmarks.html")
-.then(r => r.text())
-.then(text => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, "text/html");
-  const root = doc.querySelector("DL");
-  document.getElementById("tree").appendChild(parseDL(root));
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const folders = document.querySelectorAll("dt > h3");
 
-function nextElement(node) {
-  let n = node.nextSibling;
-  while (n && n.nodeType !== 1) n = n.nextSibling;
-  return n;
-}
+  folders.forEach(folder => {
+    const childDL = folder.nextElementSibling;
+    if (!childDL || childDL.tagName !== "DL") return;
 
-function parseDL(dl) {
-  const ul = document.createElement("ul");
+    // Create arrow toggle
+    const toggle = document.createElement("span");
+    toggle.textContent = "▶";
+    toggle.style.cursor = "pointer";
+    toggle.style.marginRight = "5px";
+    folder.prepend(toggle);
 
-  let node = dl.firstElementChild;
+    // Function to toggle this folder
+    const toggleFolder = () => {
+      childDL.classList.toggle("open");
+      toggle.textContent = childDL.classList.contains("open") ? "▼" : "▶";
+    };
 
-  while (node) {
-    if (node.tagName === "DT") {
-      const li = document.createElement("li");
+    // Click arrow or folder name
+    toggle.onclick = toggleFolder;
+    folder.onclick = toggleFolder;
 
-      const folder = node.querySelector(":scope > H3");
-      const link = node.querySelector(":scope > A");
-
-      if (folder) {
-        const toggle = document.createElement("span");
-        toggle.textContent = "▶";
-        toggle.className = "toggle";
-
-        const title = document.createElement("span");
-        title.textContent = folder.textContent;
-        title.className = "folder";
-
-        li.appendChild(toggle);
-        li.appendChild(title);
-
-        const next = nextElement(node);
-        if (next && next.tagName === "DL") {
-          const child = parseDL(next);
-          child.classList.add("nested");
-          li.appendChild(child);
-
-          function toggleFolder() {
-          child.classList.toggle("open");
-          toggle.textContent =
-          child.classList.contains("open") ? "▼" : "▶";
-          }
-
-          // Click on arrow
-          toggle.onclick = toggleFolder;
-
-          // Click on folder name (THIS is the fix)
-          title.onclick = toggleFolder;
-        }
-      }
-
-      if (link) {
-        const a = document.createElement("a");
-        a.href = link.href;
-        a.target = "_blank";
-        a.className = "bookmark";
-
-        const icon = document.createElement("img");
-        icon.className = "favicon";
-        icon.src = "https://www.google.com/s2/favicons?sz=16&domain=" + link.href;
-
-        a.appendChild(icon);
-        a.appendChild(document.createTextNode(link.textContent));
-
-        li.appendChild(a);
-      }
-
-      ul.appendChild(li);
-    }
-
-    node = node.nextElementSibling;
-  }
-
-  return ul;
-}
-
-function toggleAll(open) {
-  document.querySelectorAll(".nested").forEach(el => {
-    el.classList.toggle("open", open);
-  });
-
-  document.querySelectorAll(".toggle").forEach(t => {
-    t.textContent = open ? "▼" : "▶";
-  });
-}
-
-function toggleDark() {
-  document.body.classList.toggle("dark");
-}
-
-document.getElementById("search").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-
-  document.querySelectorAll("li").forEach(li => {
-    const text = li.innerText.toLowerCase();
-    li.style.display = text.includes(q) ? "" : "none";
+    // Start closed
+    childDL.classList.add("closed");
   });
 });
 </script>
 
-</body>
-</html>
+<style>
+/* Nested DL indentation */
+dl {
+  margin-left: 20px;
+  padding-left: 0;
+}
+
+/* Closed folders hide children */
+dl.closed {
+  display: none;
+}
+dl.open {
+  display: block;
+}
+</style>
