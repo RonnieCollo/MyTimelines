@@ -7,12 +7,7 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #ffffff;
   margin: 20px;
-}
-
-h1 {
-  font-size: 22px;
 }
 
 ul {
@@ -21,7 +16,12 @@ ul {
 }
 
 li {
-  line-height: 1.6em;
+  margin: 3px 0;
+}
+
+.folder {
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .folder::before {
@@ -32,93 +32,89 @@ li {
   content: "🔗 ";
 }
 
-.toggle {
-  cursor: pointer;
-  margin-right: 5px;
-  color: #555;
-}
-
 .nested {
   display: none;
 }
 
-.active {
+.open {
   display: block;
 }
 
-a {
-  text-decoration: none;
-  color: #0645ad;
-}
-
-a:hover {
-  text-decoration: underline;
+.toggle {
+  cursor: pointer;
+  margin-right: 5px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>My Bookmarks</h1>
-<div id="tree"></div>
+<h2>Bookmarks</h2>
+<div id="bookmarks"></div>
 
 <script>
-fetch('bookmarks.html')
-  .then(response => response.text())
+fetch("bookmarks.html")
+  .then(r => r.text())
   .then(text => {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const rootDL = doc.querySelector('dl');
-    const tree = document.getElementById('tree');
-    tree.appendChild(convertDL(rootDL));
+    const doc = parser.parseFromString(text, "text/html");
+    const root = doc.querySelector("DL");
+    const tree = buildList(root);
+    document.getElementById("bookmarks").appendChild(tree);
   });
 
-function convertDL(dl) {
-  const ul = document.createElement('ul');
+function buildList(dl) {
+  const ul = document.createElement("ul");
 
-  Array.from(dl.children).forEach(node => {
-    if (node.tagName === 'DT') {
-      const h3 = node.querySelector('h3');
-      const a = node.querySelector('a');
+  let node = dl.firstElementChild;
 
-      const li = document.createElement('li');
+  while (node) {
+    if (node.tagName === "DT") {
+      const li = document.createElement("li");
 
-      if (h3) {
-        const span = document.createElement('span');
-        span.textContent = '▶';
-        span.className = 'toggle';
+      const folder = node.querySelector("H3");
+      const link = node.querySelector("A");
 
-        const folder = document.createElement('span');
-        folder.textContent = h3.textContent;
-        folder.className = 'folder';
+      if (folder) {
+        const toggle = document.createElement("span");
+        toggle.textContent = "▶";
+        toggle.className = "toggle";
 
-        li.appendChild(span);
-        li.appendChild(folder);
+        const title = document.createElement("span");
+        title.textContent = folder.textContent;
+        title.className = "folder";
 
-        const nextDL = node.nextElementSibling;
-        if (nextDL) {
-          const nested = convertDL(nextDL);
-          nested.classList.add('nested');
-          li.appendChild(nested);
+        li.appendChild(toggle);
+        li.appendChild(title);
 
-          span.onclick = () => {
-            nested.classList.toggle('active');
-            span.textContent = nested.classList.contains('active') ? '▼' : '▶';
+        const next = node.nextElementSibling;
+        if (next && next.tagName === "DL") {
+          const childList = buildList(next);
+          childList.classList.add("nested");
+          li.appendChild(childList);
+
+          toggle.onclick = () => {
+            childList.classList.toggle("open");
+            toggle.textContent =
+              childList.classList.contains("open") ? "▼" : "▶";
           };
         }
       }
 
-      if (a) {
-        const link = document.createElement('a');
-        link.href = a.href;
-        link.textContent = a.textContent;
-        link.className = 'bookmark';
-        li.appendChild(link);
+      if (link) {
+        const a = document.createElement("a");
+        a.href = link.href;
+        a.textContent = link.textContent;
+        a.className = "bookmark";
+        a.target = "_blank";
+        li.appendChild(a);
       }
 
       ul.appendChild(li);
     }
-  });
+
+    node = node.nextElementSibling;
+  }
 
   return ul;
 }
