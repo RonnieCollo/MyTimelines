@@ -4,59 +4,75 @@
 <meta charset="UTF-8">
 <title>My Bookmarks</title>
 <style>
-  body { font-family: Arial, sans-serif; line-height: 1.4; }
-  dl { margin-left: 20px; padding-left: 0; }
-  .closed { display: none; }
-  .toggle { cursor: pointer; margin-right: 5px; user-select: none; }
-  h3 { display: inline; cursor: pointer; }
+body { font-family: Arial, sans-serif; line-height: 1.4; padding: 20px; }
+ul { list-style-type: none; padding-left: 20px; }
+li { margin: 3px 0; }
+.folder { cursor: pointer; font-weight: bold; }
+.folder::before { content: "▶ "; display: inline-block; width: 1em; }
+.folder.expanded::before { content: "▼ "; }
+a { text-decoration: none; color: #0645AD; }
+a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 <h1>My Bookmarks</h1>
-
-<!-- PASTE YOUR BOOKMARKS DL HERE -->
-<DL>
-  <DT><H3>Home</H3>
-    <DL>
-      <DT><A HREF="https://example.com">Example Site</A>
-    </DL>
-  <DT><H3>MySeas</H3>
-    <DL>
-      <DT><A HREF="https://map.openseamap.org/">OpenSeaMap</A>
-      <DT><A HREF="https://maps.garmin.com/">Garmin</A>
-    </DL>
-</DL>
+<div id="bookmarks"></div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Select all folder headers with nested DL
-  const folders = document.querySelectorAll("dt > h3");
+// Recursive function to convert bookmark HTML into nested <ul>
+function parseDL(dl) {
+    const ul = document.createElement('ul');
+    Array.from(dl.children).forEach(dt => {
+        if (dt.tagName !== 'DT') return;
 
-  folders.forEach(folder => {
-    const childDL = folder.nextElementSibling;
-    if (!childDL || childDL.tagName !== "DL") return;
+        const folder = dt.querySelector('H3');
+        const bookmark = dt.querySelector('A');
 
-    // Add toggle arrow
-    const toggle = document.createElement("span");
-    toggle.textContent = "▶";
-    toggle.className = "toggle";
-    folder.prepend(toggle);
+        if (folder) {
+            const li = document.createElement('li');
+            const span = document.createElement('span');
+            span.textContent = folder.textContent;
+            span.className = 'folder';
+            span.addEventListener('click', () => {
+                span.classList.toggle('expanded');
+                const childUl = li.querySelector('ul');
+                if (childUl) childUl.style.display = childUl.style.display === 'none' ? 'block' : 'none';
+            });
+            li.appendChild(span);
 
-    // Toggle function
-    const toggleFolder = (e) => {
-      e.stopPropagation(); // prevent parent folders from toggling
-      childDL.classList.toggle("open");
-      childDL.classList.toggle("closed");
-      toggle.textContent = childDL.classList.contains("open") ? "▼" : "▶";
-    };
+            const nestedDL = dt.querySelector('DL');
+            if (nestedDL) {
+                const childUl = parseDL(nestedDL);
+                childUl.style.display = 'none';
+                li.appendChild(childUl);
+            }
+            ul.appendChild(li);
+        } else if (bookmark) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = bookmark.href;
+            a.textContent = bookmark.textContent;
+            a.target = '_blank';
+            li.appendChild(a);
+            ul.appendChild(li);
+        }
+    });
+    return ul;
+}
 
-    toggle.addEventListener("click", toggleFolder);
-    folder.addEventListener("click", toggleFolder);
-
-    // Start closed
-    childDL.classList.add("closed");
-  });
-});
+// Load bookmarks.html content
+fetch('bookmarks.html')
+.then(response => response.text())
+.then(htmlText => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const topDL = doc.querySelector('DL');
+    if (topDL) {
+        const tree = parseDL(topDL);
+        document.getElementById('bookmarks').appendChild(tree);
+    }
+})
+.catch(err => console.error('Error loading bookmarks:', err));
 </script>
 </body>
 </html>
