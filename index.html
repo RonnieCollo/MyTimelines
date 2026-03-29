@@ -1,46 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Bookmarks</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.4; }
+  dl { margin-left: 20px; padding-left: 0; }
+  .closed { display: none; }
+  .toggle { cursor: pointer; margin-right: 5px; user-select: none; }
+  h3 { display: inline; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>My Bookmarks</h1>
+
+<!-- PASTE YOUR BOOKMARKS DL HERE -->
+<DL>
+  <DT><H3>Home</H3>
+    <DL>
+      <DT><A HREF="https://example.com">Example Site</A>
+    </DL>
+  <DT><H3>MySeas</H3>
+    <DL>
+      <DT><A HREF="https://map.openseamap.org/">OpenSeaMap</A>
+      <DT><A HREF="https://maps.garmin.com/">Garmin</A>
+    </DL>
+</DL>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Select all folder headers with nested DL
   const folders = document.querySelectorAll("dt > h3");
 
   folders.forEach(folder => {
     const childDL = folder.nextElementSibling;
     if (!childDL || childDL.tagName !== "DL") return;
 
-    // Create arrow toggle
+    // Add toggle arrow
     const toggle = document.createElement("span");
     toggle.textContent = "▶";
-    toggle.style.cursor = "pointer";
-    toggle.style.marginRight = "5px";
+    toggle.className = "toggle";
     folder.prepend(toggle);
 
-    // Function to toggle this folder
-    const toggleFolder = () => {
+    // Toggle function
+    const toggleFolder = (e) => {
+      e.stopPropagation(); // prevent parent folders from toggling
       childDL.classList.toggle("open");
+      childDL.classList.toggle("closed");
       toggle.textContent = childDL.classList.contains("open") ? "▼" : "▶";
     };
 
-    // Click arrow or folder name
-    toggle.onclick = toggleFolder;
-    folder.onclick = toggleFolder;
+    toggle.addEventListener("click", toggleFolder);
+    folder.addEventListener("click", toggleFolder);
 
     // Start closed
     childDL.classList.add("closed");
   });
 });
 </script>
-
-<style>
-/* Nested DL indentation */
-dl {
-  margin-left: 20px;
-  padding-left: 0;
-}
-
-/* Closed folders hide children */
-dl.closed {
-  display: none;
-}
-dl.open {
-  display: block;
-}
-</style>
+</body>
+</html>
