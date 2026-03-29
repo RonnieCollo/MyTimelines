@@ -34,6 +34,12 @@ body {
     border: none;
 }
 
+button {
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
 ul { list-style-type: none; padding-left: 20px; margin: 0; }
 li { margin: 3px 0; }
 .folder { cursor: pointer; font-weight: bold; }
@@ -47,6 +53,7 @@ a:hover { text-decoration: underline; }
 
 <div id="sidebar">
     <h2>Bookmarks</h2>
+    <button id="collapseBtn">Collapse All Subfolders</button>
     <div id="bookmarks"></div>
 </div>
 
@@ -56,7 +63,7 @@ a:hover { text-decoration: underline; }
 
 <script>
 // Recursive function to build bookmarks tree
-function parseDL(dl) {
+function parseDL(dl, level = 1) {
     const ul = document.createElement('ul');
     Array.from(dl.children).forEach(dt => {
         if (dt.tagName !== 'DT') return;
@@ -69,16 +76,19 @@ function parseDL(dl) {
             const span = document.createElement('span');
             span.textContent = folder.textContent;
             span.className = 'folder';
+            span.dataset.level = level;
+
             span.addEventListener('click', () => {
                 span.classList.toggle('expanded');
                 const childUl = li.querySelector('ul');
                 if (childUl) childUl.style.display = childUl.style.display === 'none' ? 'block' : 'none';
             });
+
             li.appendChild(span);
 
             const nestedDL = dt.querySelector('DL');
             if (nestedDL) {
-                const childUl = parseDL(nestedDL);
+                const childUl = parseDL(nestedDL, level + 1);
                 childUl.style.display = 'none';
                 li.appendChild(childUl);
             }
@@ -112,6 +122,19 @@ fetch('bookmarks.html')
     }
 })
 .catch(err => console.error('Error loading bookmarks:', err));
+
+// Collapse all subfolders (from level 2 down)
+document.getElementById('collapseBtn').addEventListener('click', () => {
+    const folders = document.querySelectorAll('#bookmarks .folder');
+    folders.forEach(folder => {
+        const level = parseInt(folder.dataset.level);
+        if (level > 1) {
+            folder.classList.remove('expanded');
+            const childUl = folder.parentElement.querySelector('ul');
+            if (childUl) childUl.style.display = 'none';
+        }
+    });
+});
 
 // Resizable divider
 const divider = document.getElementById('divider');
