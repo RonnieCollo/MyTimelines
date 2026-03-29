@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -144,11 +144,17 @@ function parseDL(dl) {
           child.classList.add("nested");
           li.appendChild(child);
 
-          toggle.onclick = () => {
-            child.classList.toggle("open");
-            toggle.textContent =
-              child.classList.contains("open") ? "▼" : "▶";
-          };
+          function toggleFolder() {
+          child.classList.toggle("open");
+          toggle.textContent =
+          child.classList.contains("open") ? "▼" : "▶";
+          }
+
+          // Click on arrow
+          toggle.onclick = toggleFolder;
+
+          // Click on folder name (THIS is the fix)
+          title.onclick = toggleFolder;
         }
       }
 
