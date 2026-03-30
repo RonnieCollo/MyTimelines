@@ -1,1 +1,1 @@
-https://ronniecollo.github.io/MyTimelines.github.io/
+https://ronniecollo.github.io/MyTimelines
