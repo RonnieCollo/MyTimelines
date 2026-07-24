@@ -102,8 +102,15 @@ function parseDL(dl) {
             a.addEventListener('click', (e) => {
                 e.preventDefault();
 
-                document.getElementById('content').src =
-                    "viewer.html?file=" + encodeURIComponent(bookmark.href);
+                const url = bookmark.href.toLowerCase();
+
+                if (url.endsWith(".svg")) {
+                    document.getElementById('content').src =
+                        "viewer.html?file=" + encodeURIComponent(bookmark.href);
+                } else {
+                    document.getElementById('content').src = bookmark.href;
+                }
+            
             });
             li.appendChild(a);
             ul.appendChild(li);
