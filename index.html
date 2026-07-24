@@ -104,7 +104,7 @@ function parseDL(dl) {
 
                 const url = bookmark.href.toLowerCase();
 
-                if (url.endsWith(".svg")) {
+                if (url.endsWith(".svg") || url.endsWith(".png")) {
                     document.getElementById('content').src =
                         "viewer.html?file=" + encodeURIComponent(bookmark.href);
                 } else {
