@@ -101,7 +101,9 @@ function parseDL(dl) {
             a.textContent = bookmark.textContent;
             a.addEventListener('click', (e) => {
                 e.preventDefault();
-                document.getElementById('content').src = bookmark.href;
+
+                document.getElementById('content').src =
+                    "viewer.html?file=" + encodeURIComponent(bookmark.href);
             });
             li.appendChild(a);
             ul.appendChild(li);
