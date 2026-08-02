@@ -6,4 +6,5 @@ MyTimelines is:
 - a collection of geographical/historical maps
 - a continuous work in progress
 - in English
+- looks great on a 32-inch display
 - created for me, shared with you
