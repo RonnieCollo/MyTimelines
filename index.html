@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GQW48T8F6L"></script>
 <script>
@@ -11,7 +11,7 @@
 
   gtag('config', 'G-GQW48T8F6L');
 </script>
-    
+
 <meta charset="UTF-8">
 <title>MyTimelines</title>
 <style>
@@ -45,6 +45,35 @@ body {
     border: none;
 }
 
+#search-box {
+    margin: 8px 0 12px 0;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+}
+
+#search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    font-size: 0.95em;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #0645AD;
+}
+
+mark {
+    background: #ffe066;
+    color: inherit;
+    padding: 0;
+    border-radius: 2px;
+}
+
 ul { list-style-type: none; padding-left: 20px; margin: 0; }
 li { margin: 3px 0; }
 .folder { cursor: pointer; font-weight: bold; }
@@ -57,7 +86,10 @@ a:hover { text-decoration: underline; }
 <body>
 
 <div id="sidebar">
-    <h2>MyTimelines</h2><input id="search" placeholder="Search..." style="width:100%;box-sizing:border-box;margin-bottom:8px;">
+    <h2>MyTimelines</h2>
+    <div id="search-box">
+        <input type="text" id="search-input" placeholder="Search bookmarks..." autocomplete="off">
+    </div>
     <div id="bookmarks"></div>
 </div>
 
@@ -78,11 +110,14 @@ function parseDL(dl) {
         if (folder) {
             const li = document.createElement('li');
             const span = document.createElement('span');
-            span.textContent = folder.textContent;
+            const folderText = folder.textContent;
+            span.textContent = folderText;
             span.className = 'folder';
+            span.dataset.text = folderText;
+            span.dataset.title = folderText.toLowerCase();
             span.addEventListener('click', () => {
                 span.classList.toggle('expanded');
-                const childUl = li.querySelector('ul');
+                const childUl = li.querySelector(':scope > ul');
                 if (childUl) childUl.style.display = childUl.style.display === 'none' ? 'block' : 'none';
             });
             li.appendChild(span);
@@ -97,8 +132,12 @@ function parseDL(dl) {
         } else if (bookmark) {
             const li = document.createElement('li');
             const a = document.createElement('a');
+            const linkText = bookmark.textContent;
             a.href = bookmark.href;
-            a.textContent = bookmark.textContent;
+            a.textContent = linkText;
+            a.dataset.text = linkText;
+            a.dataset.title = linkText.toLowerCase();
+            a.dataset.url = bookmark.href.toLowerCase();
             a.addEventListener('click', (e) => {
                 e.preventDefault();
 
@@ -110,7 +149,7 @@ function parseDL(dl) {
                 } else {
                     document.getElementById('content').src = bookmark.href;
                 }
-            
+
             });
             li.appendChild(a);
             ul.appendChild(li);
@@ -157,6 +196,158 @@ document.addEventListener('mouseup', e => {
     if (isDragging) {
         isDragging = false;
         document.body.style.cursor = 'default';
+    }
+});
+
+// ---------------- Search functionality ----------------
+
+const searchInput = document.getElementById('search-input');
+let searchActive = false;
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Highlights every occurrence of `query` inside `originalText` and writes
+// the result into `el`. If query is empty or not found, restores plain text.
+function applyHighlight(el, originalText, query) {
+    if (!query) {
+        el.textContent = originalText;
+        return;
+    }
+    const lower = originalText.toLowerCase();
+    let result = '';
+    let i = 0;
+    let found = false;
+
+    while (i < originalText.length) {
+        const idx = lower.indexOf(query, i);
+        if (idx === -1) {
+            result += escapeHtml(originalText.slice(i));
+            break;
+        }
+        found = true;
+        result += escapeHtml(originalText.slice(i, idx));
+        result += '<mark>' + escapeHtml(originalText.slice(idx, idx + query.length)) + '</mark>';
+        i = idx + query.length;
+    }
+
+    if (found) {
+        el.innerHTML = result;
+    } else {
+        el.textContent = originalText;
+    }
+}
+
+// Save the current expanded/collapsed state of every folder so it can be
+// restored once the search is cleared.
+function saveExpandedState() {
+    document.querySelectorAll('#bookmarks .folder').forEach(span => {
+        span.dataset.prevExpanded = span.classList.contains('expanded');
+    });
+}
+
+// Restore visibility + expanded state + plain text (no highlighting).
+function clearSearch() {
+    document.querySelectorAll('#bookmarks li').forEach(li => {
+        li.style.display = '';
+    });
+
+    document.querySelectorAll('#bookmarks .folder').forEach(span => {
+        const prevExpanded = span.dataset.prevExpanded === 'true';
+        span.classList.toggle('expanded', prevExpanded);
+
+        const li = span.closest('li');
+        const childUl = li ? li.querySelector(':scope > ul') : null;
+        if (childUl) childUl.style.display = prevExpanded ? 'block' : 'none';
+
+        span.textContent = span.dataset.text;
+    });
+
+    document.querySelectorAll('#bookmarks a').forEach(a => {
+        a.textContent = a.dataset.text;
+    });
+}
+
+// Recursively filter one <li>. Returns true if it (or a descendant) matches.
+function filterNode(li, query) {
+    const a = li.querySelector(':scope > a');
+    if (a) {
+        const isMatch = a.dataset.title.includes(query) || a.dataset.url.includes(query);
+        li.style.display = isMatch ? '' : 'none';
+        applyHighlight(a, a.dataset.text, isMatch ? query : '');
+        return isMatch;
+    }
+
+    const span = li.querySelector(':scope > span.folder');
+    const childUl = li.querySelector(':scope > ul');
+    let childMatch = false;
+
+    if (childUl) {
+        Array.from(childUl.children).forEach(childLi => {
+            if (filterNode(childLi, query)) childMatch = true;
+        });
+    }
+
+    const titleMatch = span ? span.dataset.title.includes(query) : false;
+    const visible = childMatch || titleMatch;
+    li.style.display = visible ? '' : 'none';
+
+    if (span) {
+        if (visible) {
+            span.classList.add('expanded');
+            if (childUl) childUl.style.display = 'block';
+        }
+        applyHighlight(span, span.dataset.text, titleMatch ? query : '');
+    }
+
+    return visible;
+}
+
+function runSearch(query) {
+    const topUl = document.querySelector('#bookmarks > ul');
+    if (!topUl) return;
+    Array.from(topUl.children).forEach(li => filterNode(li, query));
+}
+
+function getFirstVisibleLink() {
+    const links = document.querySelectorAll('#bookmarks a');
+    for (const a of links) {
+        if (a.offsetParent !== null) return a;
+    }
+    return null;
+}
+
+searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+
+    if (query === '') {
+        if (searchActive) {
+            clearSearch();
+            searchActive = false;
+        }
+        return;
+    }
+
+    if (!searchActive) {
+        saveExpandedState();
+        searchActive = true;
+    }
+
+    runSearch(query);
+});
+
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.blur();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = getFirstVisibleLink();
+        if (first) first.click();
     }
 });
 </script>
