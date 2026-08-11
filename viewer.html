@@ -43,8 +43,21 @@ html, body {
 #image {
     transform-origin: top left;
     user-select: none;
+    width: fit-content;
+    height: fit-content;
+}
+
+/* Raster images: prevent native browser drag-ghost and text/image selection.
+   (Not applied to inline SVG, so links inside it stay clickable.) */
+#image img {
     -webkit-user-drag: none;
+    user-select: none;
     pointer-events: none;
+    display: block;
+}
+
+#image svg {
+    display: block;
 }
 </style>
 </head>
@@ -59,22 +72,23 @@ html, body {
 </div>
 
 <div id="viewport">
-    <img id="image">
+    <div id="image"></div>
 </div>
 
 <script>
 
 const params = new URLSearchParams(location.search);
-
-const img = document.getElementById("image");
-img.src = params.get("file");
+const file = params.get("file") || "";
+const imageContainer = document.getElementById("image");
 
 let scale = 1;
 let x = 0;
 let y = 0;
+let naturalWidth = 0;
+let naturalHeight = 0;
 
 function update() {
-    img.style.transform =
+    imageContainer.style.transform =
         `translate(${x}px,${y}px) scale(${scale})`;
 }
 
@@ -92,18 +106,69 @@ function actual() {
 
 function fit() {
 
+    if (!naturalWidth || !naturalHeight) return;
+
     scale = Math.min(
-        window.innerWidth / img.naturalWidth,
-        window.innerHeight / img.naturalHeight
+        window.innerWidth / naturalWidth,
+        window.innerHeight / naturalHeight
     );
 
-    x = (window.innerWidth - img.naturalWidth * scale)/2;
-    y = (window.innerHeight - img.naturalHeight * scale)/2;
+    x = (window.innerWidth - naturalWidth * scale) / 2;
+    y = (window.innerHeight - naturalHeight * scale) / 2;
 
     update();
 }
 
-img.onload = fit;
+function onContentReady() {
+    // Measure the loaded content at scale 1 before any transform is applied.
+    imageContainer.style.transform = 'translate(0px,0px) scale(1)';
+    const rect = imageContainer.getBoundingClientRect();
+    naturalWidth = rect.width;
+    naturalHeight = rect.height;
+    fit();
+}
+
+if (file.toLowerCase().endsWith(".svg")) {
+    // Fetch and inline the SVG so it stays in this document (links, <a>,
+    // clickable). Loading SVG via <img> disables all interactivity.
+    fetch(file)
+        .then(r => {
+            if (!r.ok) throw new Error("Failed to load SVG: " + r.status);
+            return r.text();
+        })
+        .then(svgText => {
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
+
+            const parseError = svgDoc.querySelector("parsererror");
+            if (parseError) throw new Error("SVG parse error");
+
+            const svgEl = document.importNode(svgDoc.documentElement, true);
+
+            // Ensure links open a new tab rather than replacing this viewer.
+            svgEl.querySelectorAll("a").forEach(a => {
+                if (!a.getAttribute("target")) {
+                    a.setAttribute("target", "_blank");
+                }
+            });
+
+            imageContainer.appendChild(svgEl);
+            onContentReady();
+        })
+        .catch(err => {
+            console.error(err);
+            imageContainer.textContent = "Failed to load SVG.";
+        });
+} else {
+    const img = document.createElement("img");
+    img.draggable = false;
+    img.onload = onContentReady;
+    img.onerror = () => {
+        imageContainer.textContent = "Failed to load image.";
+    };
+    img.src = file;
+    imageContainer.appendChild(img);
+}
 
 window.addEventListener("resize", fit);
 
