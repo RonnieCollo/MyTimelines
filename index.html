@@ -333,5 +333,460 @@ const content =
 let isDragging = false;
 
 
-divider.addEve
-```
+divider.addEventListener('mousedown', e => {
+
+    isDragging = true;
+
+    document.body.style.cursor =
+        'col-resize';
+});
+
+
+document.addEventListener('mousemove', e => {
+
+    if (!isDragging) return;
+
+    let newWidth = e.clientX;
+
+    if (newWidth < 150)
+        newWidth = 150;
+
+    if (newWidth > 600)
+        newWidth = 600;
+
+
+    sidebar.style.width =
+        newWidth + 'px';
+
+    content.style.width =
+        `calc(100% - ${newWidth + 5}px)`;
+});
+
+
+document.addEventListener('mouseup', e => {
+
+    if (isDragging) {
+
+        isDragging = false;
+
+        document.body.style.cursor =
+            'default';
+    }
+
+});
+
+
+// ------------------------------------------------------------
+// Search functionality
+// ------------------------------------------------------------
+
+const searchInput =
+    document.getElementById('search-input');
+
+let searchActive = false;
+
+
+// Escape HTML for highlighting
+function escapeHtml(str) {
+
+    const div =
+        document.createElement('div');
+
+    div.textContent = str;
+
+    return div.innerHTML;
+}
+
+
+// Highlights every occurrence of query
+function applyHighlight(
+    el,
+    originalText,
+    query
+) {
+
+    if (!query) {
+
+        el.textContent =
+            originalText;
+
+        return;
+    }
+
+
+    const lower =
+        originalText.toLowerCase();
+
+    let result = '';
+    let i = 0;
+    let found = false;
+
+
+    while (i < originalText.length) {
+
+        const idx =
+            lower.indexOf(query, i);
+
+
+        if (idx === -1) {
+
+            result +=
+                escapeHtml(
+                    originalText.slice(i)
+                );
+
+            break;
+        }
+
+
+        found = true;
+
+
+        result +=
+            escapeHtml(
+                originalText.slice(i, idx)
+            );
+
+
+        result +=
+            '<mark>' +
+            escapeHtml(
+                originalText.slice(
+                    idx,
+                    idx + query.length
+                )
+            ) +
+            '</mark>';
+
+
+        i =
+            idx + query.length;
+    }
+
+
+    if (found) {
+
+        el.innerHTML = result;
+
+    } else {
+
+        el.textContent =
+            originalText;
+    }
+}
+
+
+// ------------------------------------------------------------
+// Save current expanded/collapsed state
+// ------------------------------------------------------------
+
+function saveExpandedState() {
+
+    document
+        .querySelectorAll('#bookmarks .folder')
+        .forEach(span => {
+
+            span.dataset.prevExpanded =
+                span.classList.contains(
+                    'expanded'
+                );
+        });
+}
+
+
+// ------------------------------------------------------------
+// Restore expanded/collapsed state
+// ------------------------------------------------------------
+
+function clearSearch() {
+
+    document
+        .querySelectorAll('#bookmarks li')
+        .forEach(li => {
+
+            li.style.display = '';
+        });
+
+
+    document
+        .querySelectorAll('#bookmarks .folder')
+        .forEach(span => {
+
+            const prevExpanded =
+                span.dataset.prevExpanded === 'true';
+
+
+            span.classList.toggle(
+                'expanded',
+                prevExpanded
+            );
+
+
+            const li =
+                span.closest('li');
+
+
+            const childUl =
+                li
+                    ? li.querySelector(':scope > ul')
+                    : null;
+
+
+            if (childUl) {
+
+                childUl.style.display =
+                    prevExpanded
+                        ? 'block'
+                        : 'none';
+            }
+
+
+            span.textContent =
+                span.dataset.text;
+        });
+
+
+    document
+        .querySelectorAll('#bookmarks a')
+        .forEach(a => {
+
+            a.textContent =
+                a.dataset.text;
+        });
+}
+
+
+// ------------------------------------------------------------
+// Recursively filter one <li>
+// ------------------------------------------------------------
+
+function filterNode(li, query) {
+
+    const a =
+        li.querySelector(':scope > a');
+
+
+    if (a) {
+
+        const isMatch =
+            a.dataset.title.includes(query) ||
+            a.dataset.url.includes(query);
+
+
+        li.style.display =
+            isMatch ? '' : 'none';
+
+
+        applyHighlight(
+            a,
+            a.dataset.text,
+            isMatch ? query : ''
+        );
+
+
+        return isMatch;
+    }
+
+
+    const span =
+        li.querySelector(
+            ':scope > span.folder'
+        );
+
+
+    const childUl =
+        li.querySelector(':scope > ul');
+
+
+    let childMatch = false;
+
+
+    if (childUl) {
+
+        Array.from(childUl.children)
+            .forEach(childLi => {
+
+                if (
+                    filterNode(
+                        childLi,
+                        query
+                    )
+                ) {
+                    childMatch = true;
+                }
+
+            });
+    }
+
+
+    const titleMatch =
+        span
+            ? span.dataset.title.includes(query)
+            : false;
+
+
+    const visible =
+        childMatch || titleMatch;
+
+
+    li.style.display =
+        visible ? '' : 'none';
+
+
+    if (span) {
+
+        if (visible) {
+
+            span.classList.add(
+                'expanded'
+            );
+
+            if (childUl) {
+
+                childUl.style.display =
+                    'block';
+            }
+        }
+
+
+        applyHighlight(
+            span,
+            span.dataset.text,
+            titleMatch ? query : ''
+        );
+    }
+
+
+    return visible;
+}
+
+
+// ------------------------------------------------------------
+// Run search
+// ------------------------------------------------------------
+
+function runSearch(query) {
+
+    const topUl =
+        document.querySelector(
+            '#bookmarks > ul'
+        );
+
+
+    if (!topUl) return;
+
+
+    Array.from(topUl.children)
+        .forEach(li => {
+
+            filterNode(
+                li,
+                query
+            );
+        });
+}
+
+
+// ------------------------------------------------------------
+// Find first visible link
+// ------------------------------------------------------------
+
+function getFirstVisibleLink() {
+
+    const links =
+        document.querySelectorAll(
+            '#bookmarks a'
+        );
+
+
+    for (const a of links) {
+
+        if (a.offsetParent !== null)
+            return a;
+    }
+
+
+    return null;
+}
+
+
+// ------------------------------------------------------------
+// Search input
+// ------------------------------------------------------------
+
+searchInput.addEventListener(
+    'input',
+    () => {
+
+        const query =
+            searchInput.value
+                .trim()
+                .toLowerCase();
+
+
+        if (query === '') {
+
+            if (searchActive) {
+
+                clearSearch();
+
+                searchActive = false;
+            }
+
+            return;
+        }
+
+
+        if (!searchActive) {
+
+            saveExpandedState();
+
+            searchActive = true;
+        }
+
+
+        runSearch(query);
+    }
+);
+
+
+// ------------------------------------------------------------
+// Search keyboard shortcuts
+// ------------------------------------------------------------
+
+searchInput.addEventListener(
+    'keydown',
+    (e) => {
+
+        if (e.key === 'Escape') {
+
+            searchInput.value = '';
+
+            searchInput.dispatchEvent(
+                new Event('input')
+            );
+
+            searchInput.blur();
+
+
+        } else if (e.key === 'Enter') {
+
+            e.preventDefault();
+
+
+            const first =
+                getFirstVisibleLink();
+
+
+            if (first)
+                first.click();
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+
