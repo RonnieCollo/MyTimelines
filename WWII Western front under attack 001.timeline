@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<timeline>
+  <version>2.12.0 (2026-04-16 3029ae6990e6)</version>
+  <timetype>gregoriantime</timetype>
+  <categories>
+    <category>
+      <name>Allied offensive</name>
+      <color>128,255,128</color>
+      <progress_color>255,153,153</progress_color>
+      <done_color>255,153,153</done_color>
+      <font_color>0,0,0</font_color>
+    </category>
+    <category>
+      <name>Maritime</name>
+      <color>0,128,255</color>
+      <progress_color>255,153,153</progress_color>
+      <done_color>255,153,153</done_color>
+      <font_color>0,0,0</font_color>
+    </category>
+    <category>
+      <name>Africa</name>
+      <color>255,213,213</color>
+      <progress_color>255,153,153</progress_color>
+      <done_color>255,153,153</done_color>
+      <font_color>0,0,0</font_color>
+    </category>
+    <category>
+      <name>Eastern Europe</name>
+      <color>232,196,253</color>
+      <progress_color>255,153,153</progress_color>
+      <done_color>255,153,153</done_color>
+      <font_color>0,0,0</font_color>
+    </category>
+  </categories>
+  <events>
+    <event>
+      <start>2025-10-26 20:38:15</start>
+      <end>2025-10-26 20:38:15</end>
+      <text>[5]Pacific</text>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+    </event>
+    <event>
+      <start>1939-09-01 00:00:00</start>
+      <end>1939-10-06 00:00:00</end>
+      <text>Invasion of Poland  1939-09-01  1939-10-06</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1939-09-01 00:00:00</start>
+      <end>1940-05-01 00:00:00</end>
+      <text>Phoney War  1939-09  1940-05</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1939-09-17 00:00:00</start>
+      <end>1939-10-06 00:00:00</end>
+      <text>Soviet invasion of Poland  1939-09-17  1939-10-06</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-04-09 00:00:00</start>
+      <end>1940-04-10 00:00:00</end>
+      <text>German invasion Denmark  1940-04-09</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-04-08 00:00:00</start>
+      <end>1940-06-10 00:00:00</end>
+      <text>Norwegian campaign  1940-04-08  1940-06-10</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-04-09 00:00:00</start>
+      <end>1940-06-08 00:00:00</end>
+      <text>Battles of Narvik  1940-04-09  1940-06-08</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-05-10 00:00:00</start>
+      <end>1940-05-17 00:00:00</end>
+      <text>German invasion Netherlands  1940-05-10  1940-05-17</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-05-10 00:00:00</start>
+      <end>1940-05-28 00:00:00</end>
+      <text>German invasion Belgium  1940-05-10  1940-05-28</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-05-10 00:00:00</start>
+      <end>1940-06-25 00:00:00</end>
+      <text>Battle of France  1940-05-10  1940-06-25</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-05-10 00:00:00</start>
+      <end>1940-06-04 00:00:00</end>
+      <text>Manstein plan Fall Gelb  1940-05-10  1940-06-04</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-06-10 00:00:00</start>
+      <end>1940-06-25 00:00:00</end>
+      <text>Italian invasion of France  1940-06-10  1940-06-25</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-07-10 00:00:00</start>
+      <end>1944-08-20 00:00:00</end>
+      <text>Vichy France  1940-07-10  1944-08-20</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-07-10 00:00:00</start>
+      <end>1940-10-31 00:00:00</end>
+      <text>Battle of Britain  1940-07-10  1940-10-31</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-09-07 00:00:00</start>
+      <end>1941-05-16 00:00:00</end>
+      <text>The Blitz  1940-09-07  1941-05-16</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1940-06-22 00:00:00</start>
+      <end>1940-06-22 00:00:00</end>
+      <text>Armistice 1940-06-22</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1942-07-14 00:00:00</start>
+      <end>1942-07-14 00:00:00</end>
+      <text>Operation Herkules  1942-07-14</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1942-03-28 00:00:00</start>
+      <end>1942-03-28 00:00:00</end>
+      <text>St Nazaire raid  1942-03-28</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1939-09-03 00:00:00</start>
+      <end>1939-09-03 00:00:00</end>
+      <text>Britain and France declare war  1939-09-03</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+    <event>
+      <start>1943-09-03 00:00:00</start>
+      <end>1943-09-03 00:00:00</end>
+      <text>Armistice of Cassibile 1943-09-03</text>
+      <progress>0</progress>
+      <fuzzy>False</fuzzy>
+      <fuzzy_start>False</fuzzy_start>
+      <fuzzy_end>False</fuzzy_end>
+      <locked>False</locked>
+      <ends_today>False</ends_today>
+      <default_color>192,192,192</default_color>
+    </event>
+  </events>
+  <view>
+    <displayed_period>
+      <start>1938-09-21 09:07:03</start>
+      <end>1945-04-03 04:07:32</end>
+    </displayed_period>
+    <hidden_categories>
+    </hidden_categories>
+    <collapsed_categories>
+    </collapsed_categories>
+  </view>
+</timeline>
