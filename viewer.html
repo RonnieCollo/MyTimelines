@@ -106,7 +106,7 @@ function actual() {
 
 function fit() {
 
-    if (!naturalWidth || !naturalHeight) return;
+    if (!naturalWidth || !naturalHeight || !isFinite(naturalWidth) || !isFinite(naturalHeight)) return;
 
     scale = Math.min(
         window.innerWidth / naturalWidth,
@@ -153,7 +153,25 @@ if (file.toLowerCase().endsWith(".svg")) {
             });
 
             imageContainer.appendChild(svgEl);
-            onContentReady();
+
+            // Prefer the SVG's own viewBox for sizing. getBoundingClientRect()
+            // is unreliable here when the SVG root has no explicit width/height
+            // attribute, because #image is sized with fit-content, which can
+            // produce a 0, huge, or otherwise wrong measured rect and break fit().
+            const viewBox = svgEl.getAttribute('viewBox');
+            let usedViewBox = false;
+            if (viewBox) {
+                const parts = viewBox.trim().split(/[\s,]+/).map(Number);
+                if (parts.length === 4 && isFinite(parts[2]) && isFinite(parts[3]) && parts[2] > 0 && parts[3] > 0) {
+                    naturalWidth = parts[2];
+                    naturalHeight = parts[3];
+                    fit();
+                    usedViewBox = true;
+                }
+            }
+            if (!usedViewBox) {
+                onContentReady();
+            }
         })
         .catch(err => {
             console.error(err);
